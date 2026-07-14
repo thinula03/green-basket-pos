@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Grocery POS</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Offline POS</p>
+          <h1 id="shopName">Grocery Shop</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="backupBtn" class="secondary-button">Backup</button>
+          <button id="restoreBtn" class="secondary-button">Restore</button>
+          <button id="exportSalesBtn" class="secondary-button">Export Sales</button>
+          <button id="printReceiptBtn" class="icon-button" title="Print last receipt">Receipt</button>
+          <button id="resetDemoBtn" class="secondary-button">Reset Demo</button>
+        </div>
+      </header>
+
+      <section class="app-frame">
+        <nav class="side-nav" aria-label="POS pages">
+          <div class="brand-lockup">
+            <span class="brand-mark">GB</span>
+            <strong>Green Basket</strong>
+          </div>
+          <button class="nav-button active" data-page-target="sale">Sale</button>
+          <button class="nav-button" data-page-target="inventory">Inventory</button>
+          <button class="nav-button" data-page-target="reports">Reports</button>
+          <button class="nav-button" data-page-target="settings">Settings</button>
+        </nav>
+
+        <div class="page-stack">
+          <section class="page active" data-page="sale">
+            <section class="summary-strip" aria-label="Daily summary">
+              <article>
+                <span>Today Sales</span>
+                <strong id="todaySales">Rs. 0</strong>
+              </article>
+              <article>
+                <span>Transactions</span>
+                <strong id="todayTransactions">0</strong>
+              </article>
+              <article>
+                <span>Low Stock</span>
+                <strong id="lowStockCount">0</strong>
+              </article>
+            </section>
+
+            <section class="sale-workspace">
+              <aside class="catalog-panel">
+                <section class="queue-panel">
+                  <div class="section-header">
+                    <h2>Order queues</h2>
+                    <button id="holdCartBtn" class="secondary-button">Hold Cart</button>
+                  </div>
+                  <div id="heldCarts" class="held-carts"></div>
+                </section>
+
+                <section class="product-list-panel">
+                  <div class="catalog-heading">
+                    <div>
+                      <p class="section-kicker">Product Lists</p>
+                      <h2>Grocery items</h2>
+                    </div>
+                    <button id="newProductBtn" class="secondary-button">New Item</button>
+                  </div>
+                  <div class="product-toolbar">
+                    <button class="secondary-button" type="button">Input manually</button>
+                    <input id="searchInput" class="search-input" type="search" placeholder="Search or scan barcode" autocomplete="off">
+                  </div>
+                  <div class="catalog-tools">
+                    <select id="categoryFilter" aria-label="Category filter"></select>
+                    <select id="sortProducts" aria-label="Product sorting">
+                      <option value="name">Name</option>
+                      <option value="stock-low">Stock Low</option>
+                      <option value="price-low">Price Low</option>
+                      <option value="price-high">Price High</option>
+                    </select>
+                    <label class="check-filter">
+                      <input id="lowStockOnly" type="checkbox">
+                      Low stock only
+                    </label>
+                  </div>
+                  <div id="categoryPills" class="category-pills" aria-label="Product categories"></div>
+                  <div id="productGrid" class="product-grid" aria-live="polite"></div>
+                </section>
+              </aside>
+
+              <section class="cart-panel">
+                <div class="cart-header">
+                  <h2>Cart Details</h2>
+                  <button id="clearCartBtn" class="secondary-button">Clear</button>
+                </div>
+                <div class="service-tabs" aria-label="Sale type">
+                  <button class="active" type="button">In store</button>
+                  <button type="button">Pickup</button>
+                  <button type="button">Delivery</button>
+                </div>
+                <section class="customer-card">
+                  <h3>Customer information</h3>
+                  <input placeholder="Customer name">
+                  <input placeholder="Phone or note">
+                </section>
+                <div class="order-items-heading">
+                  <h3>Order items</h3>
+                  <button id="clearCartMirrorBtn" class="link-button" type="button">Clear all items</button>
+                </div>
+                <div id="cartItems" class="cart-items"></div>
+
+                <div class="checkout-box">
+                  <label>
+                    Discount
+                    <input id="discountInput" type="number" min="0" step="1" value="0">
+                  </label>
+                  <label>
+                    Payment
+                    <select id="paymentMethod">
+                      <option>Cash</option>
+                      <option>Card</option>
+                      <option>Mobile</option>
+                    </select>
+                  </label>
+                  <label>
+                    Cash Received
+                    <input id="amountPaidInput" type="number" min="0" step="1" value="0">
+                  </label>
+
+                  <dl class="totals">
+                    <div><dt>Subtotal</dt><dd id="subtotalText">Rs. 0</dd></div>
+                    <div><dt>Total</dt><dd id="totalText">Rs. 0</dd></div>
+                    <div><dt>Change</dt><dd id="changeText">Rs. 0</dd></div>
+                  </dl>
+                  <button id="completeSaleBtn" class="primary-button">Complete Sale</button>
+                </div>
+              </section>
+            </section>
+          </section>
+
+          <section class="page" data-page="inventory">
+            <section class="inventory-page">
+              <div class="inventory-hero">
+                <div>
+                  <p class="section-kicker">Inventory Control</p>
+                  <h2>Product library</h2>
+                </div>
+                <button id="inventoryNewProductBtn" class="primary-button" type="button">New Product</button>
+              </div>
+
+              <section class="inventory-stats" aria-label="Inventory summary">
+                <article>
+                  <span>Total Products</span>
+                  <strong id="inventoryTotalProducts">0</strong>
+                </article>
+                <article>
+                  <span>Inventory Value</span>
+                  <strong id="inventoryValue">Rs. 0</strong>
+                </article>
+                <article>
+                  <span>Low Stock Items</span>
+                  <strong id="inventoryLowStock">0</strong>
+                </article>
+              </section>
+
+              <section class="inventory-layout">
+                <section class="inventory-library">
+                  <div class="inventory-toolbar">
+                    <input id="inventorySearch" class="search-input" type="search" placeholder="Search product, barcode, or category">
+                    <select id="inventoryCategoryFilter" aria-label="Inventory category filter"></select>
+                  </div>
+                  <div class="inventory-table-head">
+                    <span>Product</span>
+                    <span>Category</span>
+                    <span>Stock</span>
+                    <span>Price</span>
+                  </div>
+                  <div id="inventoryProductList" class="inventory-product-list"></div>
+                </section>
+
+                <aside class="inventory-editor">
+                  <div class="editor-card">
+                    <div class="panel-header">
+                      <h2>Product details</h2>
+                      <span id="formMode" class="mode-pill">New</span>
+                    </div>
+                    <div id="productImagePreview" class="image-preview editor-preview">
+                      <span>No image</span>
+                    </div>
+                    <div class="image-actions editor-image-actions">
+                      <button type="button" id="uploadImageBtn" class="secondary-button">Upload Image</button>
+                      <button type="button" id="removeImageBtn" class="danger-button">Remove</button>
+                    </div>
+                    <form id="productForm" class="product-form">
+                      <input id="productId" placeholder="Item ID" required>
+                      <input id="productName" placeholder="Name" required>
+                      <input id="productCategory" placeholder="Category">
+                      <input id="productBarcode" placeholder="Barcode">
+                      <input id="productPrice" type="number" min="0" step="1" placeholder="Price" required>
+                      <input id="productStock" type="number" min="0" step="1" placeholder="Stock" required>
+                      <div class="form-actions">
+                        <button type="submit" class="primary-button">Save Product</button>
+                        <button type="button" id="deleteProductBtn" class="danger-button">Delete</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div class="editor-card">
+                    <div class="panel-header">
+                      <h2>Stock adjustment</h2>
+                    </div>
+                    <form id="stockForm" class="product-form">
+                      <input id="stockProductLabel" placeholder="Select a product" readonly>
+                      <input id="stockQty" type="number" step="1" placeholder="+ received / - removed">
+                      <input id="stockReason" placeholder="Reason">
+                      <button type="submit" class="primary-button">Adjust Stock</button>
+                    </form>
+                  </div>
+
+                  <div class="editor-card">
+                    <div class="panel-header">
+                      <h2>Recent movements</h2>
+                    </div>
+                    <div id="stockMoves" class="stock-moves"></div>
+                  </div>
+                </aside>
+              </section>
+            </section>
+          </section>
+
+          <section class="page" data-page="reports">
+            <section class="reports-page">
+              <div class="reports-hero">
+                <div>
+                  <p class="section-kicker">Sales Analytics</p>
+                  <h2>Reports overview</h2>
+                </div>
+                <div class="report-tools">
+                  <input id="salesFrom" type="date" aria-label="Sales from">
+                  <input id="salesTo" type="date" aria-label="Sales to">
+                </div>
+              </div>
+
+              <dl class="report-kpis">
+                <div><dt>Range Sales</dt><dd id="rangeSales">Rs. 0</dd></div>
+                <div><dt>Average Sale</dt><dd id="averageSale">Rs. 0</dd></div>
+                <div><dt>Orders</dt><dd id="reportOrderCount">0</dd></div>
+                <div><dt>Items Sold</dt><dd id="reportItemsSold">0</dd></div>
+              </dl>
+
+              <section class="reports-grid">
+                <section class="report-card">
+                  <div class="panel-header">
+                    <h2>Payment methods</h2>
+                  </div>
+                  <div id="paymentBreakdown" class="breakdown-list"></div>
+                </section>
+                <section class="report-card">
+                  <div class="panel-header">
+                    <h2>Top products</h2>
+                  </div>
+                  <div id="topProducts" class="breakdown-list"></div>
+                </section>
+              </section>
+
+              <section class="report-card">
+                <div class="panel-header">
+                  <h2>Sales history</h2>
+                  <button id="reportsExportBtn" class="secondary-button" type="button">Export CSV</button>
+                </div>
+                <div class="sales-table-head">
+                  <span>Receipt</span>
+                  <span>Date</span>
+                  <span>Items</span>
+                  <span>Payment</span>
+                  <span>Total</span>
+                </div>
+                <div id="salesList" class="sales-list"></div>
+              </section>
+            </section>
+          </section>
+
+          <section class="page" data-page="settings">
+            <section class="settings-page">
+              <div class="settings-hero">
+                <div>
+                  <p class="section-kicker">System Settings</p>
+                  <h2>Store profile and data</h2>
+                </div>
+              </div>
+
+              <section class="settings-layout">
+                <section class="settings-card shop-profile-card">
+                  <div class="panel-header">
+                    <h2>Shop profile</h2>
+                  </div>
+                  <form id="shopForm" class="settings-form">
+                    <label>Shop name<input id="shopNameInput" placeholder="Shop name" required></label>
+                    <label>Address<input id="shopAddressInput" placeholder="Address"></label>
+                    <label>Phone<input id="shopPhoneInput" placeholder="Phone"></label>
+                    <label>Currency prefix<input id="shopCurrencyInput" placeholder="Currency prefix"></label>
+                    <button type="submit" class="primary-button">Save Shop</button>
+                  </form>
+                </section>
+
+                <section class="settings-card">
+                  <div class="panel-header">
+                    <h2>Data management</h2>
+                  </div>
+                  <div class="settings-actions">
+                    <button id="settingsBackupBtn" class="secondary-button" type="button">Backup Data</button>
+                    <button id="settingsRestoreBtn" class="secondary-button" type="button">Restore Backup</button>
+                    <button id="settingsResetBtn" class="danger-button" type="button">Reset Demo Data</button>
+                  </div>
+                </section>
+
+                <section class="settings-card">
+                  <div class="panel-header">
+                    <h2>Local storage</h2>
+                  </div>
+                  <dl class="settings-facts">
+                    <div><dt>Products</dt><dd id="settingsProductCount">0</dd></div>
+                    <div><dt>Sales</dt><dd id="settingsSalesCount">0</dd></div>
+                    <div><dt>Held carts</dt><dd id="settingsHeldCartCount">0</dd></div>
+                  </dl>
+                </section>
+              </section>
+            </section>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="receiptDialog" class="receipt-dialog">
+      <div class="receipt-toolbar">
+        <button id="voidSaleBtn" class="danger-button">Void Sale</button>
+        <div>
+          <button id="dialogPrintBtn" class="primary-button">Print</button>
+          <button id="closeReceiptBtn" class="secondary-button">Close</button>
+        </div>
+      </div>
+      <div id="receiptPreview"></div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
